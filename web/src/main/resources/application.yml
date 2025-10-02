@@ -1,5 +1,5 @@
 rebrickable:
-  key: insert-key
+  key: 683adc46fe0b60add9c6c5920ec4f0f0
 
 spring:
   server.tomcat:
@@ -8,8 +8,7 @@ spring:
     graphiql:
       enabled: true
   datasource:
-    #https://www.baeldung.com/spring-boot-h2-database
-    url: jdbc:h2:file:./h2-bricks;AUTO_SERVER=TRUE
+    url: jdbc:h2:file:./h2-lego;AUTO_SERVER=TRUE
     driverClassName: org.h2.Driver
     username: sa
     password: password
