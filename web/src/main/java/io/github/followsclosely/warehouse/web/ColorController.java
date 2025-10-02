@@ -6,18 +6,20 @@ import io.github.followsclosely.warehouse.repository.LegoColorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
 
-@RestController()
+@RestController
+@RequestMapping("/colors")
 @RequiredArgsConstructor
 public class ColorController {
 
     private final LegoColorRepository legoColorRepository;
 
-    @GetMapping(value = "/colors", produces = "application/json")
+    @GetMapping(produces = "application/json")
     List<RebrkColor> getColors() {
         return List.of(
                 RebrkColor.builder().id(1L).name("Red").rgb("FF0000").build(),
@@ -26,12 +28,12 @@ public class ColorController {
         );
     }
 
-    @GetMapping(value = "/colors/provider/{provider}/{id}", produces = "application/json")
+    @GetMapping(value = "/provider/{provider}/{id}", produces = "application/json")
     public LegoColor findByProviderAndProviderId(@PathVariable String provider, @PathVariable String id) {
         return legoColorRepository.findByProvider(provider, id);
     }
 
-    @GetMapping(value = "/colors/{id}", produces = "application/json")
+    @GetMapping(value = "/{id}", produces = "application/json")
     public Optional<LegoColor> findById(@PathVariable String id) {
         return legoColorRepository.findById(id);
     }
