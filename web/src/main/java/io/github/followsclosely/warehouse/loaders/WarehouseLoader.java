@@ -20,8 +20,6 @@ public abstract class WarehouseLoader<E> {
     public void load(LoaderContext context, LoaderContext.JobDetails job) throws IOException {
     }
 
-    ;
-
     public void postProcessing(Optional<E> existing, E entity, Supplier<String> id, LoaderContext.JobDetails job, Javers javers, java.util.function.Consumer<E> saveFunction) {
         if (existing != null && existing.isPresent()) {
             Diff differences = javers.compare(existing.get(), entity);

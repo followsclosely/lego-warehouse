@@ -6,8 +6,6 @@ import io.github.followsclosely.warehouse.entity.LegoInventory;
 import io.github.followsclosely.warehouse.entity.LegoSet;
 import io.github.followsclosely.warehouse.loaders.WarehouseLoader;
 import io.github.followsclosely.warehouse.repository.LegoInventoryRepository;
-import io.github.followsclosely.warehouse.repository.LegoMinifigRepository;
-import io.github.followsclosely.warehouse.repository.LegoPartRepository;
 import io.github.followsclosely.warehouse.repository.LegoSetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +24,6 @@ import java.util.Optional;
 public class RebrkInventoryLoader extends WarehouseLoader<LegoInventory> {
     private final LegoInventoryRepository legoInventoryRepository;
     private final LegoSetRepository legoSetRepository;
-    private final LegoPartRepository legoPartRepository;
-    private final LegoMinifigRepository legoMinifigRepository;
     private final Javers javers = JaversBuilder.javers().build();
 
     @Override
