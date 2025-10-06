@@ -4,6 +4,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
 import lombok.*;
 import org.javers.core.metamodel.annotation.ValueObject;
+import org.javers.core.metamodel.annotation.DiffIgnore;
 
 import java.util.Optional;
 import java.util.Set;
@@ -22,10 +23,12 @@ public class LegoInventory {
     private String id;
     private Integer version;
 
+    @DiffIgnore
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "lego_inventory_parts", joinColumns = @JoinColumn(name = "inventory_id"))
     private Set<LegoInventoryPart> parts;
 
+    @DiffIgnore
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "lego_inventory_minifigs", joinColumns = @JoinColumn(name = "inventory_id"))
     private Set<LegoInventoryMinifig> minifigs;
@@ -43,5 +46,11 @@ public class LegoInventory {
                 )
                 .findFirst();
 
+    }
+
+    public Optional<LegoInventoryMinifig> getMinifig(@Nonnull String minifigId) {
+        return minifigs.stream()
+                .filter(i -> minifigId.equals(i.getLegoMinifig().getId()))
+                .findFirst();
     }
 }

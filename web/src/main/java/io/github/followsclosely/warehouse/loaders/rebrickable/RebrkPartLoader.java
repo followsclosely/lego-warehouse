@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @Slf4j
 @Order(60)
-@Component
+//@Component
 @RequiredArgsConstructor
 public class RebrkPartLoader extends WarehouseLoader<LegoPart> {
     private final LegoPartRepository legoPartRepository;

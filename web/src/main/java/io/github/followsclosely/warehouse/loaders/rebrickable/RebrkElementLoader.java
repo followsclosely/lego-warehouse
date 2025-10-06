@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @Slf4j
 @Order(70)
-@Component
+//@Component
 @RequiredArgsConstructor
 public class RebrkElementLoader extends WarehouseLoader<LegoElement> {
     private final LegoElementRepository legoElementRepository;

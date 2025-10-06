@@ -1,12 +1,11 @@
 package io.github.followsclosely.warehouse.loaders.rebrickable;
 
-import io.github.followsclosely.rebrickable.catalog.RebrkInventoryPartCatalogLoader;
-import io.github.followsclosely.warehouse.entity.LegoColor;
+import io.github.followsclosely.rebrickable.catalog.RebrkInventoryMinifigCatalogLoader;
 import io.github.followsclosely.warehouse.entity.LegoInventory;
-import io.github.followsclosely.warehouse.entity.LegoInventoryPart;
+import io.github.followsclosely.warehouse.entity.LegoInventoryMinifig;
 import io.github.followsclosely.warehouse.loaders.WarehouseLoader;
 import io.github.followsclosely.warehouse.repository.LegoInventoryRepository;
-import io.github.followsclosely.warehouse.repository.LegoPartRepository;
+import io.github.followsclosely.warehouse.repository.LegoMinifigRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
@@ -20,21 +19,21 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
-@Order(80)
-//@Component
+@Order(85)
+@Component
 @RequiredArgsConstructor
-public class RebrkInventoryPartLoader extends WarehouseLoader<LegoInventoryPart> {
+public class RebrkInventoryMinifigLoader extends WarehouseLoader<LegoInventoryMinifig> {
 
-    private final LegoPartRepository legoPartRepository;
+    private final LegoMinifigRepository legoMinifigRepository;
     private final LegoInventoryRepository legoInventoryRepository;
 
     @Override
     public void load(LoaderContext context, LoaderContext.JobDetails job) throws IOException {
-        Set<LegoInventoryPart> parts = new HashSet<>();
+        Set<LegoInventoryMinifig> minifigs = new HashSet<>();
         AtomicReference<Boolean> dirty = new AtomicReference<>(Boolean.FALSE);
         AtomicReference<LegoInventory> inventory = new AtomicReference<>();
 
-        new RebrkInventoryPartCatalogLoader().stream().forEach(rebrkInventory -> {
+        new RebrkInventoryMinifigCatalogLoader().stream().forEach(rebrkInventory -> {
             log.info("Processing {}", rebrkInventory);
             String id = String.valueOf(rebrkInventory.getId());
 
@@ -43,12 +42,12 @@ public class RebrkInventoryPartLoader extends WarehouseLoader<LegoInventoryPart>
                 if (inventory.get() != null) {
                     if (dirty.get()) {
                         legoInventoryRepository.save(inventory.get());
-                        log.info("Saved inventory: {} with {} unique parts", inventory.get().getId(), inventory.get().getParts().size());
+                        log.info("Saved inventory: {} with {} unique minifigs", inventory.get().getId(), inventory.get().getMinifigs().size());
                         dirty.set(Boolean.FALSE);
                     } else {
                         log.info("No changes for inventory: {}", inventory.get().getId());
                     }
-                    parts.clear();
+                    minifigs.clear();
                 }
                 Optional<LegoInventory> o = legoInventoryRepository.findById(id);
                 if (o.isPresent()) {
@@ -60,51 +59,40 @@ public class RebrkInventoryPartLoader extends WarehouseLoader<LegoInventoryPart>
                 }
             }
 
-            LegoInventoryPart legoInventoryPart = LegoInventoryPart.builder()
-                    .spare(rebrkInventory.getIsSpare())
+            LegoInventoryMinifig legoInventoryMinifig = LegoInventoryMinifig.builder()
                     .quantity(rebrkInventory.getQuantity())
                     .build();
 
-            legoPartRepository.findById(rebrkInventory.getPartId()).ifPresentOrElse(legoInventoryPart::setLegoPart, () -> {
-                ;
-                log.error("Part not found: {}", rebrkInventory.getPartId());
+            legoMinifigRepository.findById(rebrkInventory.getMinifigId()).ifPresentOrElse(legoInventoryMinifig::setLegoMinifig, () -> {
+                log.error("Minifig not found: {}", rebrkInventory.getMinifigId());
             });
 
-            LegoColor color = context.getColorCache().get(String.valueOf(rebrkInventory.getColorId()));
-            if (color == null) {
-                log.error("Color not found: {}", rebrkInventory.getColorId());
-            } else {
-                legoInventoryPart.setLegoColor(color);
-            }
-            //If present, update the quantity and spare flag if changed, otherwise add the part to the inventory
-            inventory.get().getPart(legoInventoryPart.getLegoPart().getId(), legoInventoryPart.getLegoColor().getId(), legoInventoryPart.isSpare()).ifPresentOrElse(p -> {
-                if (p.getQuantity() != legoInventoryPart.getQuantity()) {
-                    p.setQuantity(legoInventoryPart.getQuantity());
+            // If present, update the quantity if changed, otherwise add the minifig to the inventory
+            inventory.get().getMinifig(legoInventoryMinifig.getLegoMinifig().getId()).ifPresentOrElse(m -> {
+                if (m.getQuantity() != legoInventoryMinifig.getQuantity()) {
+                    m.setQuantity(legoInventoryMinifig.getQuantity());
                     job.getCounters().incrementUpdated();
                     dirty.set(Boolean.TRUE);
                 } else {
                     job.getCounters().incrementSkipped();
                 }
             }, () -> {
-                ;
-                //Add the part to the inventory if not already present
-                inventory.get().getParts().add(legoInventoryPart);
+                inventory.get().getMinifigs().add(legoInventoryMinifig);
                 job.getCounters().incrementInserted();
                 dirty.set(Boolean.TRUE);
             });
-            parts.add(legoInventoryPart);
+            minifigs.add(legoInventoryMinifig);
             job.getCounters().incrementProcessed();
         });
 
-        //Save the last inventory
         if (inventory.get() != null) {
-            //Save the parts for the previous inventory
             if (dirty.get()) {
                 legoInventoryRepository.save(inventory.get());
-                log.info("LAST: Saved inventory: {} with {} unique parts", inventory.get().getId(), inventory.get().getParts().size());
+                log.info("LAST: Saved inventory: {} with {} unique minifigs", inventory.get().getId(), inventory.get().getMinifigs().size());
             }
         }
-
         job.complete();
     }
 }
+
+
