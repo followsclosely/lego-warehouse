@@ -1,5 +1,6 @@
 package io.github.followsclosely.warehouse.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.javers.core.metamodel.annotation.ValueObject;
@@ -15,15 +16,17 @@ import java.util.List;
 @Builder
 @ValueObject
 @ToString(of = {"id", "name"}, includeFieldNames = false)
-public class LegoColor {
+public class LegoTheme {
     @Id
     private String id;
     private String name;
-    private String rgb;
-    private Boolean transparent;
 
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private LegoTheme parent;
+
+    @Transient
     @Builder.Default
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "lego_color_provider", joinColumns = @JoinColumn(name = "color_id"))
-    private List<LegoColorProvider> providers = new ArrayList<>();
+    private List<LegoTheme> children = new ArrayList<>();
 }

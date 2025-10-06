@@ -1,7 +1,9 @@
 package io.github.followsclosely.warehouse.web;
 
-import io.github.followsclosely.warehouse.loaders.rebrickable.RebrkColorLoader;
+import io.github.followsclosely.warehouse.loaders.LoaderGroup;
+import io.github.followsclosely.warehouse.loaders.rebrickable.LoaderContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,11 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class LoaderController {
 
-    private final RebrkColorLoader rebrkColorLoader;
+    private final LoaderGroup loaderGroup;
 
-    @GetMapping(value = "/colors", produces = "application/json")
-    String getColors() {
-        rebrkColorLoader.load();
-        return "LoaderController: colors";
+    @GetMapping(value = "/load", produces = "application/json")
+    LoaderContext loadAll() throws Exception {
+        loaderGroup.loadAllAsync(new LoaderContext());
+        return loaderGroup.getLastContext();
+    }
+
+    @GetMapping(value = "/load-status", produces = "application/json")
+    LoaderContext loadStatus() throws Exception {
+        return loaderGroup.getLastContext();
     }
 }
