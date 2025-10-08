@@ -33,6 +33,11 @@ public class LegoInventory {
     @CollectionTable(name = "lego_inventory_minifigs", joinColumns = @JoinColumn(name = "inventory_id"))
     private Set<LegoInventoryMinifig> minifigs;
 
+    @DiffIgnore
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "lego_inventory_sets", joinColumns = @JoinColumn(name = "inventory_id"))
+    private Set<LegoInventorySet> sets;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "set_id")
     private LegoSet legoSet;
